@@ -1,6 +1,11 @@
 ﻿<#
 .SYNOPSIS
 	This script performs the installation or uninstallation of an application(s).
+	# LICENSE #
+	PowerShell App Deployment Toolkit - Provides a set of functions to perform common application deployment tasks on Windows.
+	Copyright (C) 2017 - Sean Lillis, Dan Cunningham, Muhammad Mashwani, Aman Motazedian.
+	This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU Lesser General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
 .DESCRIPTION
 	The script is provided as a template to perform an install or uninstall of an application(s).
 	The script either performs an "Install" deployment type or an "Uninstall" deployment type.
@@ -50,7 +55,7 @@ Param (
 
 Try {
 	## Set the script execution policy for this process
-	Try { Set-ExecutionPolicy -ExecutionPolicy 'ByPass' -Scope 'Process' -Force -ErrorAction 'Stop' } Catch {}
+	Try { Set-ExecutionPolicy -ExecutionPolicy 'ByPass' -Scope 'Process' -Force -ErrorAction 'Stop' } Catch { Write-Error "Failed to set the execution policy to Bypass for this process." }
 
 	##*===============================================
 	##* VARIABLE DECLARATION
@@ -58,13 +63,13 @@ Try {
 	## Variables: Application
 	[string]$appVendor = 'Mozilla'
 	[string]$appName = 'Firefox ESR'
-	[string]$appVersion = '45.4.0'
+	[string]$appVersion = '52.6.0'
 	[string]$appArch = 'x86'
 	[string]$appLang = 'EN'
 	[string]$appRevision = '01'
-	[string]$appScriptVersion = '1.0.0'
-	[string]$appScriptDate = '11/03/2016'
-	[string]$appScriptAuthor = 'MSU Denver'
+	[string]$appScriptVersion = '1.1.0'
+	[string]$appScriptDate = '03/07/2018'
+	[string]$appScriptAuthor = 'Jordan Hamilton'
 	##*===============================================
 	## Variables: Install Titles (Only set here to override defaults set by the toolkit)
 	[string]$installName = ''
@@ -78,8 +83,8 @@ Try {
 
 	## Variables: Script
 	[string]$deployAppScriptFriendlyName = 'Deploy Application'
-	[version]$deployAppScriptVersion = [version]'3.6.8'
-	[string]$deployAppScriptDate = '02/06/2016'
+	[version]$deployAppScriptVersion = [version]'3.7.0'
+	[string]$deployAppScriptDate = '02/13/2018'
 	[hashtable]$deployAppScriptParameters = $psBoundParameters
 
 	## Variables: Environment
@@ -111,7 +116,7 @@ Try {
 		##*===============================================
 		[string]$installPhase = 'Pre-Installation'
 
-		## Show Welcome Message, close Internet Explorer if required, allow up to 3 deferrals, verify there is enough disk space to complete the install, and persist the prompt
+		## Show Welcome Message, close Firefox if needed, verify there is enough disk space to complete the install, and persist the prompt
 		Show-InstallationWelcome -CloseApps 'firefox,maintenanceservice' -CheckDiskSpace -PersistPrompt
 
 		## Show Progress Message (with the default message)
@@ -132,7 +137,8 @@ Try {
 		}
 
 		## <Perform Installation tasks here>
-		Execute-Process -Path "Firefox Setup ${appVersion}esr.exe" -Parameters "-ms" -WindowStyle 'Hidden'
+		$exitCode = Execute-Process -Path "Firefox Setup ${appVersion}esr.exe" -Parameters "-ms" -WindowStyle "Hidden" -WaitForMsiExec -PassThru
+		If (($exitCode.ExitCode -ne "0") -and ($mainExitCode -ne "3010")) { $mainExitCode = $exitCode.ExitCode }
 
 		##*===============================================
 		##* POST-INSTALLATION
@@ -141,10 +147,11 @@ Try {
 
 		## <Perform Post-Installation tasks here>
 		Remove-File -Path "$envCommonDesktop\Mozilla Firefox.lnk" -ContinueOnError $true
-		Copy-File -Path "$dirSupportFiles\*" -Destination "$envProgramFilesX86\Mozilla Firefox" -Recurse
 
 		## Display a message at the end of the install
-		If (-not $useDefaultMsi) {}
+		If (-not $useDefaultMsi) {
+
+		}
 	}
 	ElseIf ($deploymentType -ieq 'Uninstall')
 	{
@@ -174,7 +181,8 @@ Try {
 		}
 
 		# <Perform Uninstallation tasks here>
-		Execute-Process -Path "$envProgramFilesX86\Mozilla Firefox\uninstall\helper.exe" -Parameters "/S"
+		$exitCode = Execute-Process -Path "$envProgramFilesX86\Mozilla Firefox\uninstall\helper.exe" -Parameters "/S" -WindowStyle "Hidden" -WaitForMsiExec -PassThru
+		If (($exitCode.ExitCode -ne "0") -and ($mainExitCode -ne "3010")) { $mainExitCode = $exitCode.ExitCode }
 
 		##*===============================================
 		##* POST-UNINSTALLATION
@@ -182,8 +190,6 @@ Try {
 		[string]$installPhase = 'Post-Uninstallation'
 
 		## <Perform Post-Uninstallation tasks here>
-
-
 	}
 
 	##*===============================================
@@ -204,8 +210,8 @@ Catch {
 # SIG # Begin signature block
 # MIIU4wYJKoZIhvcNAQcCoIIU1DCCFNACAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCDi12X5Pic2uXc+
-# JzZX28pwdTP+vmuv0X3Y1Vf52MV/mqCCD4cwggQUMIIC/KADAgECAgsEAAAAAAEv
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCAUgp+E1ZSyxakQ
+# SNQmWl4UO0dac+17VTAT+P8rlO3+K6CCD4cwggQUMIIC/KADAgECAgsEAAAAAAEv
 # TuFS1zANBgkqhkiG9w0BAQUFADBXMQswCQYDVQQGEwJCRTEZMBcGA1UEChMQR2xv
 # YmFsU2lnbiBudi1zYTEQMA4GA1UECxMHUm9vdCBDQTEbMBkGA1UEAxMSR2xvYmFs
 # U2lnbiBSb290IENBMB4XDTExMDQxMzEwMDAwMFoXDTI4MDEyODEyMDAwMFowUjEL
@@ -292,26 +298,26 @@ Catch {
 # FgNlZHUxGTAXBgoJkiaJk/IsZAEZFgltc3VkZW52ZXIxFTATBgoJkiaJk/IsZAEZ
 # FgV3aW5hZDEZMBcGA1UEAxMQd2luYWQtVk1XQ0EwMS1DQQITfwAAACITuo77mvOv
 # 9AABAAAAIjANBglghkgBZQMEAgEFAKBmMBgGCisGAQQBgjcCAQwxCjAIoAKAAKEC
-# gAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwLwYJKoZIhvcNAQkEMSIEIIHm
-# 3dCaeyThXi+S46m2KOgjRoeHZol/h5ojH08QiANBMA0GCSqGSIb3DQEBAQUABIIB
-# AKkUXe9qOLj4YhvVbMCnxb8jS1q81WAM8Xox866d9MpkxXFGT8TtKeX+p9/+8A81
-# vvjmzJy+gF2x4lHLJwnGem+eDLJYU6lTD2wYKddccFbXpXNlEtNLpkPHK2OyyHCm
-# Teb+QKn82by13T8QkfdjB61RhjNZ3c9GWo7J8YJut8KHmB7vyYnmkd2i7P5mF31F
-# Eq19Fu9hx3mFQywtupUMvkSd9kFH3IhCk/frbZXkykqyih+KAaONJVVT6dQ+iktE
-# R1JVzKpNQXt+G3W0RQ6Nc+T3MuvdyIBsXTc6j/VvMogC4FSIFyU0ejSk7JHSskRn
-# 67LUuUn3oMUGeZkVEDMFio+hggKiMIICngYJKoZIhvcNAQkGMYICjzCCAosCAQEw
+# gAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwLwYJKoZIhvcNAQkEMSIEIORq
+# skha2RhWmf0LCEmW+zvb5nmaEGFR/J7yOIZPIx3pMA0GCSqGSIb3DQEBAQUABIIB
+# AKx3w04Y3np+L+dFSkGzeZ9uEHvPO7TS1CanJ43hHCtiSjGQVL/Op9H1OMTvya6E
+# PI9GgFRRbB+Bzo4scZ5dfUoldgLB43SOda32VxU69GDpsBaVgKgNrixUPDIeeyM6
+# MghtvoPFEVw3WhD27HftNnD7v/eheTHM53HI+WCFMU50F0RjaUpH25PDJ79XJ03s
+# Pf3UNCG9nShrSyANFiRDpzfQLBgzCs7h7YtvtgL5ch/IKvg9Cz6wU9DfvIUlGlEy
+# eJjJFeIcOkI52wrSbxkLjaArUPNb9YtPZRU0gCxZ2a5LEVMfZTweYYi8C5MSMk99
+# 18rAUi7KJIJ8wnhqAdgS1b2hggKiMIICngYJKoZIhvcNAQkGMYICjzCCAosCAQEw
 # aDBSMQswCQYDVQQGEwJCRTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTEoMCYG
 # A1UEAxMfR2xvYmFsU2lnbiBUaW1lc3RhbXBpbmcgQ0EgLSBHMgISESHWmadklz7x
 # +EJ+6RnMU0EUMAkGBSsOAwIaBQCggf0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEH
-# ATAcBgkqhkiG9w0BCQUxDxcNMTYxMTA4MjAwNjU3WjAjBgkqhkiG9w0BCQQxFgQU
-# koiQbjNXo6zOH+LLoOAFbq0+fKgwgZ0GCyqGSIb3DQEJEAIMMYGNMIGKMIGHMIGE
+# ATAcBgkqhkiG9w0BCQUxDxcNMTgwMzA3MTgyMjE4WjAjBgkqhkiG9w0BCQQxFgQU
+# 6tYVloNqA4dlm3/2HNW2kJWfgvwwgZ0GCyqGSIb3DQEJEAIMMYGNMIGKMIGHMIGE
 # BBRjuC+rYfWDkJaVBQsAJJxQKTPseTBsMFakVDBSMQswCQYDVQQGEwJCRTEZMBcG
 # A1UEChMQR2xvYmFsU2lnbiBudi1zYTEoMCYGA1UEAxMfR2xvYmFsU2lnbiBUaW1l
 # c3RhbXBpbmcgQ0EgLSBHMgISESHWmadklz7x+EJ+6RnMU0EUMA0GCSqGSIb3DQEB
-# AQUABIIBAFEoLgLQOByZ4LUjgpROGlnzRdWCo8tOY4zaHfYsJlYtZEC7KGcsbQ+J
-# ljzyKD3tCsLhS6V92dubi084hlmNoW2MkkZtkPESCF3u0H7RhjmJG3XIMS9/o2LT
-# H6vCEfNlXKA9vUYtoxskvJKSMXbV3vu+0gNAn3UxUvW/t8dETZ8EbVDB49d+9D07
-# 8OloAEjMPaUpQiQsgVLU2GSdlEAdoUYeYOG+0dq6SgsrVgz63VPIx24+2c2/jmTx
-# yATq974j/R5vSdeT0ABuS4mNbSZ/V39Tw1re6Xt5b9hZq59RBlYyotlqkXvPMvuD
-# lcrJI1keXn0p5HtwlPlLzbZkt4EEjwU=
+# AQUABIIBAKVNGCpP6r1ImRgx0bu6zK5lx67/4yLR1Ie7Tf16Gd5ST+dLWx/uQZBU
+# lrlaFb9PkTPYYLH/NeIUirsyiUPtKuPmZRWmUH0DqVdLzGoA4lhKWPTCIljgER2B
+# Xyv+WVog5y0ZrwE2N+0E7HzeSitYl6kSe964JXn1m76eifJp8qqbo5MOky49kW3u
+# FN9KojcBt9ik2E+P8ASYbsPfIasNxDZcdI6AaHByuy6/Hkei+8ReUOZvk+fua57q
+# 0cp6EhKGDmlSAwWwi14wSy0rDJcfx46Hvc9+n8tuvj+8zw6KO+/cWLHvZL9zKIfl
+# dC1ndIvGTyy+VQvsH5jKU4Xg3PXom48=
 # SIG # End signature block
