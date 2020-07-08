@@ -137,7 +137,7 @@ Try {
 		}
 
 		## <Perform Installation tasks here>
-		$exitCode = Execute-MSI -Action Install -Path "$dirfiles\Firefox Setup ${appVersion}esr.msi" -Parameters "-ms" -WindowStyle "Hidden" -WaitForMsiExec -PassThru
+		$exitCode = Execute-MSI -Action Install -Path "$dirfiles\Firefox Setup ${appVersion}esr.msi" -Parameters "-ms" -PassThru
 		If (($exitCode.ExitCode -ne "0") -and ($mainExitCode -ne "3010")) { $mainExitCode = $exitCode.ExitCode }
 
 		##*===============================================
