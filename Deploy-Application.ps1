@@ -137,7 +137,7 @@ Try {
 		}
 
 		## <Perform Installation tasks here>
-		$exitCode = Execute-Process -Path "$dirfiles\Firefox Setup ${appVersion}esr.exe" -Parameters "-ms" -WindowStyle "Hidden" -WaitForMsiExec -PassThru
+		$exitCode = Execute-MSI -Action Install -Path "$dirfiles\Firefox Setup ${appVersion}esr.msi" -Parameters "-ms" -WindowStyle "Hidden" -WaitForMsiExec -PassThru
 		If (($exitCode.ExitCode -ne "0") -and ($mainExitCode -ne "3010")) { $mainExitCode = $exitCode.ExitCode }
 
 		##*===============================================
@@ -164,7 +164,7 @@ Try {
 		Show-InstallationWelcome -CloseApps 'firefox,maintenanceservice' -CloseAppsCountdown 60
 
 		## Show Progress Message (with the default message)
-		Show-InstallationProgress
+		Show-InstallationProgress -StatusMessage "Uninstalling Application $installTitle. Please Wait..."
 
 		## <Perform Pre-Uninstallation tasks here>
 
