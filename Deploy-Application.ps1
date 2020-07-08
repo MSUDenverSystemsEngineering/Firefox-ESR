@@ -63,13 +63,13 @@ Try {
 	## Variables: Application
 	[string]$appVendor = 'Mozilla'
 	[string]$appName = 'Firefox ESR'
-	[string]$appVersion = '52.7.2'
-	[string]$appArch = 'x86'
+	[string]$appVersion = '68.8.0'
+	[string]$appArch = 'x64'
 	[string]$appLang = 'EN'
 	[string]$appRevision = '01'
-	[string]$appScriptVersion = '1.1.2'
+	[string]$appScriptVersion = '1.0.0'
 	[string]$appScriptDate = '03/22/2018'
-	[string]$appScriptAuthor = 'Jordan Hamilton'
+	[string]$appScriptAuthor = 'Jordan Hamilton, James Hardy'
 	##*===============================================
 	## Variables: Install Titles (Only set here to override defaults set by the toolkit)
 	[string]$installName = ''
